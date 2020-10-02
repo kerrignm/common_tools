@@ -7,9 +7,8 @@ import str2md5
 import monkeypeach
 import fibonacci
 import calculator
-import settings
 
-CMD = namedtuple('CMD', 'id sept task')
+CMD = namedtuple('CMD', 'id sept label task')
 
 class Config():
     def __init__(self):
@@ -18,15 +17,13 @@ class Config():
         self.result = ""
         self.log = ""
         
-        self.setting = settings.Settings()
-        
         self.con = threading.Condition()
         self.workQueue = queue.Queue(10)
         
-        self.CMDS = [CMD(0, 1, str2md5.Str2Md5()),
-                     CMD(1, 1, monkeypeach.MonkeyPeach()),
-                     CMD(2, 1, fibonacci.Fibonacci()),
-                     CMD(3, 0, calculator.Calculator())]
+        self.CMDS = [CMD(0, 1, "转换", str2md5.Str2Md5()),
+                     CMD(1, 1, "运行", monkeypeach.MonkeyPeach()),
+                     CMD(2, 1, "运行", fibonacci.Fibonacci()),
+                     CMD(3, 0, "计算", calculator.Calculator())]
     
     def get_id(self):
         return self.id
@@ -54,6 +51,9 @@ class Config():
     
     def get_cmd(self):
         return self.CMDS[self.id].task.get_cmd()
+    
+    def get_run_label(self):
+        return self.CMDS[self.id].label
     
     def run_method(self):
         return self.CMDS[self.id].task.do_cmd(self.data)

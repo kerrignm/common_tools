@@ -3,6 +3,7 @@
 import re
 import basetask
 import debug
+from settings import Settings
 
 class Calculator(basetask.BaseTask):
     
@@ -76,7 +77,15 @@ class Calculator(basetask.BaseTask):
         if opt == '*':
             result = str(fir * sec)
         elif opt == '/':
-            result = str(fir / sec)
+            if Settings.get_instance().get_precision() == 0:
+                result = str(fir // sec)
+            elif Settings.get_instance().get_precision() == 1:
+                result = str(fir / sec)
+            else:
+                if fir % sec == 0:
+                    result = "商是：%d" % fir // sec
+                else:
+                    result = "商是：%d ，余数是：%d"% (fir // sec, fir % sec)
         elif opt == '+':
             result = str(fir + sec)
         else:

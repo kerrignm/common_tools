@@ -3,6 +3,7 @@
 from tkinter import *
 import time
 import debug
+from settings import Settings
 
 class CmdWin():
     def __init__(self, root, config):
@@ -10,6 +11,7 @@ class CmdWin():
         self.config = config
         self.select = IntVar()
         self.mode = IntVar()
+        self.precision = IntVar()
         self.line_num = 0
 
 
@@ -24,20 +26,33 @@ class CmdWin():
         self.root.resizable(0, 0)
         
         menubar = Menu(self.root)
-        editmenu = Menu(menubar, tearoff=False)
+        task_menu = Menu(menubar, tearoff=False)
         self.select.set(0)
-        menubar.add_cascade(label="任务选项", menu=editmenu)
+        menubar.add_cascade(label="任务选项", menu=task_menu)
         for cmd in self.config.CMDS:
-            editmenu.add_radiobutton(label=cmd.task.get_cmd(), command=self.cmd_callback, variable=self.select, value=cmd.id)
+            task_menu.add_radiobutton(label=cmd.task.get_cmd(), command=self.cmd_callback, variable=self.select, value=cmd.id)
             if cmd.sept:
-                editmenu.add_separator()
-        modemenu = Menu(menubar, tearoff=False)
-        self.mode.set(self.config.setting.get_mode())
-        menubar.add_separator()
-        menubar.add_cascade(label="模式", menu=modemenu)
-        modemenu.add_radiobutton(label="发布版", command=self.mode_callback, variable=self.mode, value=0)
-        modemenu.add_separator()
-        modemenu.add_radiobutton(label="调试版", command=self.mode_callback, variable=self.mode, value=1)
+                task_menu.add_separator()
+        
+        set_menu = Menu(menubar, tearoff=False)
+        set_menu.mode_menu = Menu(set_menu, tearoff=False)
+        self.mode.set(Settings.get_instance().get_mode())
+        set_menu.mode_menu.add_radiobutton(label="发布版", command=self.mode_callback, variable=self.mode, value=0)
+        set_menu.mode_menu.add_separator()
+        set_menu.mode_menu.add_radiobutton(label="调试版", command=self.mode_callback, variable=self.mode, value=1)
+        set_menu.add_cascade(label="模式", menu=set_menu.mode_menu)
+        
+        set_menu.calculate_menu = Menu(set_menu, tearoff=False)
+        self.precision.set(Settings.get_instance().get_precision())
+        set_menu.calculate_menu.add_radiobutton(label="整数", command=self.calculate_callback, variable=self.precision, value=0)
+        set_menu.calculate_menu.add_separator()
+        set_menu.calculate_menu.add_radiobutton(label="小数", command=self.calculate_callback, variable=self.precision, value=1)
+        set_menu.calculate_menu.add_separator()
+        set_menu.calculate_menu.add_radiobutton(label="余数", command=self.calculate_callback, variable=self.precision, value=2)
+        set_menu.add_separator()
+        set_menu.add_cascade(label="精度", menu=set_menu.calculate_menu)
+        
+        menubar.add_cascade(label="设置", menu=set_menu)
         self.root.config(menu=menubar)
         
         self.input_label = Label(self.root, text="输入数据")
@@ -54,12 +69,14 @@ class CmdWin():
         self.log_text = Text(self.root, width=110, height=9)
         self.log_text.grid(row=13, column=0, columnspan=22)
         
-        self.btn_text = StringVar()
-        self.cmd_button = Button(self.root, textvariable=self.btn_text, bg="lightskyblue", width=10, state='normal')
-        self.btn_text.set(self.config.get_cmd())
+        self.cmd_text = StringVar()
+        self.cmd_button = Button(self.root, textvariable=self.cmd_text, bg="lightskyblue", width=10, state='normal')
+        self.cmd_text.set(self.config.get_cmd())
         self.cmd_button.grid(row=0, column=11)
-        self.run_button = Button(self.root, text="运行", bg="lightblue", width=10,command=self.do_cmd)
+        self.run_text = StringVar()
+        self.run_button = Button(self.root, textvariable=self.run_text, bg="lightblue", width=10,command=self.do_cmd)
         self.run_button.grid(row=2, column=11)
+        self.run_text.set(self.config.get_run_label())
     
     def set_btn_status(self, status):
         if status:
@@ -70,11 +87,16 @@ class CmdWin():
     def cmd_callback(self):
         debug.log("cmd_callback() value = %s" % self.select.get())
         self.config.set_id(self.select.get())
-        self.btn_text.set(self.config.get_cmd())
+        self.cmd_text.set(self.config.get_cmd())
+        self.run_text.set(self.config.get_run_label())
         
     def mode_callback(self):
         debug.log("mode_callback() value = %s" % self.mode.get())
-        self.config.setting.set_mode(self.mode.get())
+        Settings.get_instance().set_mode(self.mode.get())
+        
+    def calculate_callback(self):
+        debug.log("calculate_callback() value = %s" % self.precision.get())
+        Settings.get_instance().set_precision(self.precision.get())
 
     def do_cmd(self):
         src = self.input_text.get(1.0, END).strip().replace("\n", "")

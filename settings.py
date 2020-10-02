@@ -8,10 +8,19 @@ class Settings():
 
     __settings_file = "setting.ini"
     
+    __s_instance = None
+    
     def __init__(self):
-        self.data = { 'mode' : 0}
+        self.data = { 'mode' : 0,
+                      'precision' : 0}
         self.read_settings()
         debug.set_enable(self.get_mode())
+    
+    @classmethod
+    def get_instance(cls):
+        if cls.__s_instance == None:
+            cls.__s_instance = cls()
+        return cls.__s_instance
     
     def read_settings(self):
         if not os.path.isfile(Settings.__settings_file):
@@ -34,6 +43,13 @@ class Settings():
     def set_mode(self, mode):
         debug.set_enable(mode)
         self.data['mode'] = mode
+        self.write_settings()
+    
+    def get_precision(self):
+        return self.data['precision']
+    
+    def set_precision(self, precision):
+        self.data['precision'] = precision
         self.write_settings()
     
     
