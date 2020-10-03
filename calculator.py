@@ -83,7 +83,7 @@ class Calculator(basetask.BaseTask):
                 result = str(fir / sec)
             else:
                 if fir % sec == 0:
-                    result = "商是：%d" % fir // sec
+                    result = "商是：%d" % (fir // sec)
                 else:
                     result = "商是：%d ，余数是：%d"% (fir // sec, fir % sec)
         elif opt == '+':

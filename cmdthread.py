@@ -41,9 +41,9 @@ class CmdThread(threading.Thread):
                 except Exception as e:
                     debug.log(e)
                     if debug.get_enable():
-                        self.config.set_log("EXPT:" + self.config.get_cmd() + " error \n%S" % traceback.format_exc())
+                        self.config.set_log("EXPT:" + self.config.get_cmd() + " error \n%s" % traceback.format_exc())
                     else:
-                        self.config.set_log("EXPT:" + self.config.get_cmd() + " error [%S]" % e)
+                        self.config.set_log("EXPT:" + self.config.get_cmd() + " error [%s]" % e)
                     debug.log("Exception : " + self.config.get_log())
                 self.config.con.notify()
                 debug.log("process_cmd(end) %s cmd %s result %s" % (threadName, cmd, self.config.get_result()))
